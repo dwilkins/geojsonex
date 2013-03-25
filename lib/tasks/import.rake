@@ -1,4 +1,3 @@
-
 namespace :import do
   desc 'Import state data from the census'
   task :state, [:state_in] => :environment do |tsk, _state_in|
@@ -11,9 +10,10 @@ namespace :import do
     fips_to_id = []
     state_to_id = {}
     terminator = ""
-    File.open('public/st99_d00a.dat','rb') do |fp|
-      fp.each_line do |line|
-        record_num = fp.lineno % 6
+    File.open('public/st99_d00a.dat.gz','rb') do |fp|
+      gz = Zlib::GzipReader.new(fp)
+      gz.each_line do |line|
+        record_num = gz.lineno % 6
         #    puts "#{record_num} - \'#{line.strip.delete '\"'}\'"
         case record_num
         when 1
@@ -27,7 +27,7 @@ namespace :import do
         when 5
           lasd_translation = line.strip.delete '"'
         when 0
-          if fp.eof
+          if gz.eof
             terminator = ';'
           else
             terminator = ','
@@ -52,31 +52,44 @@ namespace :import do
     terminator = ""
     state_name = nil
     starting_point = true;
+    entity_boundaries_raw = []
+    created_at = updated_at = Time.now.in_time_zone('UTC')
     sb = []
-    print "Reading........\r"
-    File.open('public/st99_d00.dat','rb') do |fp|
-      fp.each_line do |line|
+    print "Inserting State Boundaries...\r"
+    File.open('public/st99_d00.dat.gz','rb') do |fp|
+      gz = Zlib::GzipReader.new(fp)
+      gz.each_line do |line|
         if line.strip =~ /^([0-9]+) +([0-9\-+.E]+)  +([0-9\-+.E]+)$/
           id = $1.to_i
           lng = $2.to_f
           lat = $3.to_f
           starting_point = true;
+          unless entity_boundaries_raw.empty?
+            sql = 'insert into entity_boundaries (entity_id,starting_point,lat,lng,created_at, updated_at) values '
+            sql = sql + entity_boundaries_raw.collect do |b|
+              "(#{b[0]},#{b[1]},#{b[2]},#{b[3]},'#{b[4]}','#{b[5]}')"
+            end.join(',')
+            conn = EntityBoundary.connection
+            conn.execute(sql)
+            entity_boundaries_raw = []
+          end
         elsif line.strip =~ /^([0-9\-\+.E]+)  +([0-9\-+.E]+)$/
           lng = $1.to_f
           lat = $2.to_f
         elsif line.strip !~ /^(END|-99999)$/
-#          puts '"' + line.strip + '"'
           exit
         end
         unless state_name == states[id].entity_name
           state_name = states[id].entity_name
           puts state_name
         end
-        EntityBoundary.create({ entity_id: states[id].id,
-                                starting_point: starting_point,
-                                lat: lat,
-                                lng: lng
-                              })
+        entity_boundaries_raw << [states[id].id,
+                                  starting_point,
+                                  lat,
+                                  lng,
+                                  created_at,
+                                  updated_at
+                                 ]
         starting_point = false;
       end
     end
@@ -95,10 +108,10 @@ namespace :import do
     counties = []
     fips_to_id = {}
     terminator = ""
-    File.open('public/co99_d00a.dat','rb') do |fp|
-      fp.each_line do |line|
-        record_num = fp.lineno % 7
-        #    puts "#{record_num} - \'#{line.strip.delete '\"'}\'"
+    File.open('public/co99_d00a.dat.gz','rb') do |fp|
+      gz = Zlib::GzipReader.new(fp)
+      gz.each_line do |line|
+        record_num = gz.lineno % 7
         case record_num
         when 1
           id = line.strip.to_i
@@ -110,13 +123,15 @@ namespace :import do
         when 3
           county_fips_code = line.strip.delete '"'
         when 4
+          # Some names have iso characters
+          line.force_encoding("iso-8859-1")
           county_name = line.strip.delete '"'
         when 5
           lasd = line.strip.delete '"'
         when 6
           lasd_translation = line.strip.delete '"'
         when 0
-          if fp.eof
+          if gz.eof
             terminator = ';'
           else
             terminator = ','
@@ -144,9 +159,10 @@ namespace :import do
     entity_boundaries = []
     entity_boundaries_raw = []
     created_at = updated_at = Time.now.in_time_zone('UTC')
-    print "Reading........\r"
-    File.open('public/co99_d00.dat','rb') do |fp|
-      fp.each_line do |line|
+    print "Inserting County Boundaries...\r"
+    File.open('public/co99_d00.dat.gz','rb') do |fp|
+      gz = Zlib::GzipReader.new(fp)
+      gz.each_line do |line|
         if line.strip =~ /^([0-9]+) +([0-9\-+.E]+)  +([0-9\-+.E]+)$/
           id = $1.to_i
           lng = $2.to_f
