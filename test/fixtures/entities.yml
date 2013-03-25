@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  fips_code: MyString
+  entity_name: MyString
+  entity_type: MyString
+  entity_parent_id: 1
+  lasd: MyString
+  lasd_translation: MyString
+
+two:
+  fips_code: MyString
+  entity_name: MyString
+  entity_type: MyString
+  entity_parent_id: 1
+  lasd: MyString
+  lasd_translation: MyString

@@ -1,0 +1,7 @@
+%h1 US States
+- @states.in_groups_of(3) do |state_group|
+  .row-fluid
+    - state_group.each do |state|
+      .state-name.span3
+        = link_to state.entity_name,state_path(state) if state
+

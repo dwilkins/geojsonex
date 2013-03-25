@@ -1,0 +1,19 @@
+%p#notice= notice
+%h1
+  Information for
+  = @state.entity_name
+
+.row-fluid
+  #map.smallmap.span6.pull-right{"data-url" => "#{state_path(@state,:geojson)}",
+                                 "data-name" => "#{@state.entity_name}" }
+  .counties.span6
+    - @state.children.in_groups_of(4).each do |county_group|
+      .grouping
+        - county_group.each do |county|
+          - if county
+            .county-name.span3
+              %a.county{href: "#",
+                        "data-url" => "#{county_path(county,:geojson)}",
+                        "data-name" => "#{county.entity_name}"}= county.entity_name
+
+

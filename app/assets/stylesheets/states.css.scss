@@ -1,0 +1,19 @@
+.state-name {
+}
+
+.counties {
+    .grouping {
+    }
+    .county-name {
+    }
+    .selected {
+        background-color: lightgreen;
+    }
+}
+
+#map {
+    height: 400px;
+    img {
+        max-width: none;
+    }
+}

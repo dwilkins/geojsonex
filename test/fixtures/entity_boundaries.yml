@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  entity_id: 1
+  starting_point: 
+  lat: 9.99
+  lng: 9.99
+
+two:
+  entity_id: 1
+  starting_point: 
+  lat: 9.99
+  lng: 9.99
