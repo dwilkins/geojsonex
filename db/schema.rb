@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130323041422) do
+ActiveRecord::Schema.define(:version => 20130325225629) do
 
   create_table "entities", :force => true do |t|
     t.string   "fips_code",        :limit => 4
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(:version => 20130323041422) do
     t.string   "lasd_translation", :limit => 50
     t.datetime "created_at",                     :null => false
     t.datetime "updated_at",                     :null => false
+    t.binary   "geojson_cache"
   end
 
   create_table "entity_boundaries", :force => true do |t|
