@@ -20,9 +20,9 @@ ActiveRecord::Schema.define(:version => 20130325225629) do
     t.integer  "entity_parent_id"
     t.string   "lasd",             :limit => 4
     t.string   "lasd_translation", :limit => 50
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
-    t.binary   "geojson_cache"
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.text     "geojson_cache",    :limit => 2147483647
   end
 
   create_table "entity_boundaries", :force => true do |t|
